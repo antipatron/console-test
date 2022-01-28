@@ -1,6 +1,6 @@
-import sys
 import click
 import requests
+
 
 __author__ = "antipatron"
 
@@ -12,13 +12,39 @@ def main():
     """
     pass
 
-@main.command(short_help='init the repo')
-@click.option('--value', '-va', help='Valores numericos separados por coma', required=False, type=str)
-def sum(value):
+@main.command(context_settings=dict(help_option_names=['-h', '--help']))
+@click.argument('numbertype', default="INT",type=click.Choice(['int', 'float']))
+@click.option('--numbers', '-n', help='Valores numericos separados por signo más (+)', required=True)
+def sum(numbers, numbertype):
     """Retorna la suma de los valores numericos"""
-    print(value)
-    if (len(value)>0):
-        click.echo('\n'.join(value))
+    print(numbertype)
+    try:
+        values = numbers.split(',')
+        print(values)
+    except ValueError:
+        pass
+
+    sum = 0
+    for i, value in enumerate(values):
+        try:
+            parseNumber(numbertype, value)
+        except ValueError:
+            values[i] = value
+        else:
+            values[i] = parseNumber(numbertype, value)
+            sum+=values[i]
+    
+    click.echo(f"Suma:  {sum}")
+
+def parseNumber(numberType, number):
+    if numberType=="int":
+        return int(number)
+    elif numberType == "float":
+        return float(number)
+    else:
+        return int(number)
+
+
 
 @main.command()
 @click.option('--query', '-q', prompt=True)
@@ -29,7 +55,7 @@ def search(query, limit):
     query = "+".join(query.split())
     print(limit)
 
-    query_params = {
+    query_params = {  
         'q': query
     }
 
